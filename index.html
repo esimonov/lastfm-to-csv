@@ -172,7 +172,7 @@
             .map(function(r, i){
               return {
                 data:r,
-                i:i
+                i:r.page,
               }
             })
 
@@ -185,7 +185,7 @@
             .then(function(tracks){
               var blb = new Blob([
                 tracks.map(function(d){
-                  return row(['artist', 'album', 'name', 'date'], d)
+                  return row(['uts', 'utc_time', 'artist', 'artist_mbid', "album", "album_mbid", "track", "track_mbid"], d)
                 })
                 .map(csv).join('\n') + '\n']);
               data[item.i] = blb;

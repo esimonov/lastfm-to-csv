@@ -4,11 +4,12 @@ function lastFM(data, callback){
   return reqwest({
     url:"https://ws.audioscrobbler.com/2.0/",
     data: data,
-    type: 'xml',
+    type: 'json',
     success: function(data){
       if(callback){callback(false, data)}
     },
     error: function(err){
+      console.log(err, data)
       if(callback){callback(err)}
     }
   })
@@ -19,6 +20,7 @@ function requestData(api_key, user, page){
   return {
     method:'user.getrecenttracks',
     user:user,
+    format: 'json',
     api_key:api_key,
     limit:200,
     page: page || 1
@@ -28,7 +30,8 @@ function requestData(api_key, user, page){
 // generate a list of request data objects
 function requestList(api_key, user, page_count){
   var requests = [];
-  for(var page = 1; page <= page_count; page++){
+  const startPage = 1; //2182;
+  for(var page = startPage; page <= page_count; page++){
     requests.push(requestData(api_key, user, page))
   }
   return requests
@@ -40,22 +43,28 @@ function extractTracks(doc){
   // probably nicer ways to do this
   var arr = [];
   var track, obj, child;
-  var tracks = doc.evaluate('lfm/recenttracks/track', doc, null, XPathResult.ANY_TYPE, null)
-  while (track = tracks.iterateNext()){
-    obj = {};
-    for (var i = track.childNodes.length - 1; i >= 0; i--) {
-      child = track.childNodes[i];
-      obj[child.tagName] = child.textContent;
-    };
+  var tracks = doc.recenttracks.track;
+  tracks.forEach(track => {
+    const obj = {
+      'uts': track.date['uts'],
+      'utc_time': track.date['#text'],
+      'artist': track.artist['#text'],
+      'artist_mbid': track.artist['mbid'],
+      'album': track.album['#text'],
+      'album_mbid': track.album['mbid'],
+      'track': track.name,
+      'track_mbid': track.mbid,
+    }
     arr.push(obj)
   }
+);
 
   return arr;
 }
 
 function extractPageCount(doc){
-  var recenttracks = doc.evaluate('lfm/recenttracks', doc, null, XPathResult.ANY_TYPE, null).iterateNext()
-  return parseInt(recenttracks.getAttribute('totalPages'), 10)
+  //return parseInt(doc.recenttracks['@attr'].totalPages, 10)
+  return 2
 }
 
 // pull out a row of keys
