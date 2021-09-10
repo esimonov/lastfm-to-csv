@@ -42,20 +42,22 @@ function extractTracks(doc){
 
   // probably nicer ways to do this
   var arr = [];
-  var track, obj, child;
   var tracks = doc.recenttracks.track;
+  
   tracks.forEach(track => {
-    const obj = {
-      'uts': track.date['uts'],
-      'utc_time': track.date['#text'],
-      'artist': track.artist['#text'],
-      'artist_mbid': track.artist['mbid'],
-      'album': track.album['#text'],
-      'album_mbid': track.album['mbid'],
-      'track': track.name,
-      'track_mbid': track.mbid,
+    if (track.date !== undefined) {
+      const obj = {
+        'uts': track.date['uts'],
+        'utc_time': track.date['#text'],
+        'artist': track.artist['#text'],
+        'artist_mbid': track.artist['mbid'],
+        'album': track.album['#text'],
+        'album_mbid': track.album['mbid'],
+        'track': track.name,
+        'track_mbid': track.mbid,
+      }
+      arr.push(obj)
     }
-    arr.push(obj)
   }
 );
 
